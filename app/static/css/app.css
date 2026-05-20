@@ -88,6 +88,7 @@ button, .primary {
   place-items: center;
   padding: 20px;
 }
+.preview[hidden] { display: none; }
 .preview img { max-height: 90vh; border-radius: 8px; }
 .login-shell { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
 .login-card { width: min(420px, 100%); display: grid; gap: 14px; }
@@ -151,4 +152,3 @@ tfoot th { background: #f1f5f2; }
   .management-list article { grid-template-columns: 72px 1fr; }
   .management-list article button { grid-column: 1 / -1; }
 }
-
