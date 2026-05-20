@@ -41,8 +41,8 @@ button, .primary {
 .public-shell { width: min(1120px, 100%); margin: 0 auto; padding: 20px; }
 .admin-shell {
   width: auto;
-  margin-inline-start: 0;
-  margin-inline-end: calc(var(--admin-sidebar-width) + var(--admin-sidebar-gap));
+  margin-left: 0;
+  margin-right: calc(var(--admin-sidebar-width) + var(--admin-sidebar-gap));
   padding: 24px;
 }
 .hero {
@@ -228,7 +228,7 @@ tfoot th { background: #f1f5f2; }
   .public-shell, .admin-shell { padding: 14px; }
   .admin-shell {
     width: auto;
-    margin-inline-end: 0;
+    margin-right: 0;
   }
   .hero { min-height: 220px; display: grid; align-items: end; }
   .form-grid, .filters, .panel-form, .panel-form.compact { grid-template-columns: 1fr; }
