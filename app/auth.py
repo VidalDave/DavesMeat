@@ -1,23 +1,39 @@
 import os
-from functools import wraps
-from typing import Callable
+import hashlib
 
+import bcrypt
 from fastapi import HTTPException, Request, status
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.models import User
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+HASH_PREFIX = "$bcrypt-sha256$"
+
+
+def _password_digest(password: str) -> bytes:
+    return hashlib.sha256(password.encode("utf-8")).digest()
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    password_hash = bcrypt.hashpw(_password_digest(password), bcrypt.gensalt(rounds=12)).decode("utf-8")
+    return f"{HASH_PREFIX}{password_hash}"
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return pwd_context.verify(password, password_hash)
+    if password_hash.startswith(HASH_PREFIX):
+        stored_hash = password_hash.removeprefix(HASH_PREFIX).encode("utf-8")
+        return bcrypt.checkpw(_password_digest(password), stored_hash)
+
+    # Backward compatibility for plain bcrypt hashes created before the
+    # bcrypt-sha256 wrapper. bcrypt 5 rejects inputs over 72 bytes.
+    password_bytes = password.encode("utf-8")
+    if len(password_bytes) > 72:
+        return False
+    try:
+        return bcrypt.checkpw(password_bytes, password_hash.encode("utf-8"))
+    except ValueError:
+        return False
 
 
 def authenticate_user(db: Session, username: str, password: str) -> User | None:
@@ -48,4 +64,3 @@ def require_role(user: User, roles: set[str]) -> None:
 
 def session_cookie_secure() -> bool:
     return os.getenv("APP_ENV", "development").lower() in {"production", "prod"}
-
