@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth import hash_password, session_cookie_secure
-from app.database import Base, SessionLocal, engine
+from app.database import SessionLocal
 from app.models import DeliverySetting, Location, Product, User
 from app.routers import admin, public
 
@@ -25,7 +25,6 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     def startup() -> None:
-        Base.metadata.create_all(bind=engine)
         seed_data()
 
     return app
@@ -76,4 +75,3 @@ def seed_data() -> None:
 
 
 app = create_app()
-

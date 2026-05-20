@@ -5,7 +5,6 @@ Revises:
 Create Date: 2026-05-20
 """
 from alembic import op
-import sqlalchemy as sa
 
 
 revision = "0001_initial"
@@ -15,87 +14,103 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        "users",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("username", sa.String(length=80), nullable=False),
-        sa.Column("password_hash", sa.String(length=255), nullable=False),
-        sa.Column("role", sa.String(length=30), nullable=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+    # The first Render deploy briefly created tables from SQLAlchemy before
+    # Alembic was stamped. IF NOT EXISTS lets that database adopt migrations.
+    op.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(80) NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            role VARCHAR(30) NOT NULL,
+            is_active BOOLEAN NOT NULL,
+            created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+        )
+        """
     )
-    op.create_index(op.f("ix_users_id"), "users", ["id"])
-    op.create_index(op.f("ix_users_username"), "users", ["username"], unique=True)
+    op.execute("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_users_id ON users (id)")
 
-    op.create_table(
-        "products",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("name", sa.String(length=160), nullable=False),
-        sa.Column("image_url", sa.Text(), nullable=False),
-        sa.Column("weight", sa.String(length=80), nullable=False),
-        sa.Column("price", sa.Numeric(10, 2), nullable=False),
-        sa.Column("features", sa.Text(), nullable=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+    op.execute(
+        """
+        CREATE TABLE IF NOT EXISTS products (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(160) NOT NULL,
+            image_url TEXT NOT NULL,
+            weight VARCHAR(80) NOT NULL,
+            price NUMERIC(10, 2) NOT NULL,
+            features TEXT NOT NULL,
+            is_active BOOLEAN NOT NULL,
+            created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+        )
+        """
     )
-    op.create_index(op.f("ix_products_id"), "products", ["id"])
+    op.execute("CREATE INDEX IF NOT EXISTS ix_products_id ON products (id)")
 
-    op.create_table(
-        "locations",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("name", sa.String(length=120), nullable=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False),
+    op.execute(
+        """
+        CREATE TABLE IF NOT EXISTS locations (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(120) NOT NULL,
+            is_active BOOLEAN NOT NULL
+        )
+        """
     )
-    op.create_index(op.f("ix_locations_id"), "locations", ["id"])
-    op.create_unique_constraint("uq_locations_name", "locations", ["name"])
+    op.execute("CREATE INDEX IF NOT EXISTS ix_locations_id ON locations (id)")
+    op.execute("CREATE UNIQUE INDEX IF NOT EXISTS uq_locations_name ON locations (name)")
 
-    op.create_table(
-        "delivery_settings",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("mode", sa.String(length=30), nullable=False),
-        sa.Column("allowed_weekdays", sa.String(length=30), nullable=False),
+    op.execute(
+        """
+        CREATE TABLE IF NOT EXISTS delivery_settings (
+            id SERIAL PRIMARY KEY,
+            mode VARCHAR(30) NOT NULL,
+            allowed_weekdays VARCHAR(30) NOT NULL
+        )
+        """
     )
 
-    op.create_table(
-        "orders",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("full_name", sa.String(length=160), nullable=False),
-        sa.Column("phone", sa.String(length=40), nullable=False),
-        sa.Column("location_id", sa.Integer(), nullable=False),
-        sa.Column("delivery_date", sa.Date(), nullable=False),
-        sa.Column("status", sa.String(length=30), nullable=False),
-        sa.Column("admin_note", sa.Text(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(["location_id"], ["locations.id"]),
+    op.execute(
+        """
+        CREATE TABLE IF NOT EXISTS orders (
+            id SERIAL PRIMARY KEY,
+            full_name VARCHAR(160) NOT NULL,
+            phone VARCHAR(40) NOT NULL,
+            location_id INTEGER NOT NULL REFERENCES locations(id),
+            delivery_date DATE NOT NULL,
+            status VARCHAR(30) NOT NULL,
+            admin_note TEXT NOT NULL,
+            created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+        )
+        """
     )
-    op.create_index(op.f("ix_orders_id"), "orders", ["id"])
-    op.create_index(op.f("ix_orders_phone"), "orders", ["phone"])
-    op.create_index(op.f("ix_orders_location_id"), "orders", ["location_id"])
-    op.create_index(op.f("ix_orders_delivery_date"), "orders", ["delivery_date"])
-    op.create_index(op.f("ix_orders_status"), "orders", ["status"])
+    op.execute("CREATE INDEX IF NOT EXISTS ix_orders_id ON orders (id)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_orders_phone ON orders (phone)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_orders_location_id ON orders (location_id)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_orders_delivery_date ON orders (delivery_date)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_orders_status ON orders (status)")
 
-    op.create_table(
-        "order_items",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("order_id", sa.Integer(), nullable=False),
-        sa.Column("product_id", sa.Integer(), nullable=False),
-        sa.Column("quantity", sa.Integer(), nullable=False),
-        sa.Column("unit_price", sa.Numeric(10, 2), nullable=False),
-        sa.Column("product_name", sa.String(length=160), nullable=False),
-        sa.Column("product_weight", sa.String(length=80), nullable=False),
-        sa.ForeignKeyConstraint(["order_id"], ["orders.id"]),
-        sa.ForeignKeyConstraint(["product_id"], ["products.id"]),
+    op.execute(
+        """
+        CREATE TABLE IF NOT EXISTS order_items (
+            id SERIAL PRIMARY KEY,
+            order_id INTEGER NOT NULL REFERENCES orders(id),
+            product_id INTEGER NOT NULL REFERENCES products(id),
+            quantity INTEGER NOT NULL,
+            unit_price NUMERIC(10, 2) NOT NULL,
+            product_name VARCHAR(160) NOT NULL,
+            product_weight VARCHAR(80) NOT NULL
+        )
+        """
     )
-    op.create_index(op.f("ix_order_items_id"), "order_items", ["id"])
-    op.create_index(op.f("ix_order_items_order_id"), "order_items", ["order_id"])
-    op.create_index(op.f("ix_order_items_product_id"), "order_items", ["product_id"])
+    op.execute("CREATE INDEX IF NOT EXISTS ix_order_items_id ON order_items (id)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_order_items_order_id ON order_items (order_id)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_order_items_product_id ON order_items (product_id)")
 
 
 def downgrade() -> None:
-    op.drop_table("order_items")
-    op.drop_table("orders")
-    op.drop_table("delivery_settings")
-    op.drop_table("locations")
-    op.drop_table("products")
-    op.drop_table("users")
-
+    op.execute("DROP TABLE IF EXISTS order_items")
+    op.execute("DROP TABLE IF EXISTS orders")
+    op.execute("DROP TABLE IF EXISTS delivery_settings")
+    op.execute("DROP TABLE IF EXISTS locations")
+    op.execute("DROP TABLE IF EXISTS products")
+    op.execute("DROP TABLE IF EXISTS users")
