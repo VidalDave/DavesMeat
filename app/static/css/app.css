@@ -104,6 +104,14 @@ button, .primary {
   padding: 10px;
   background: #fff;
 }
+.calendar[hidden] { display: none; }
+.native-date-proxy {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
 .calendar-head {
   display: grid;
   grid-template-columns: 40px 1fr 40px;

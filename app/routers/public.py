@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.email import send_new_order_email
 from app.models import DeliverySetting, Location, Order, OrderItem, Product
 
 
@@ -96,4 +97,6 @@ async def create_order(request: Request, db: Session = Depends(get_db)):
     order = Order(full_name=full_name, phone=phone, location_id=location.id, delivery_date=delivery_date, items=order_items)
     db.add(order)
     db.commit()
+    db.refresh(order)
+    send_new_order_email(order, setting.notification_email)
     return RedirectResponse("/?success=true", status_code=303)

@@ -17,12 +17,36 @@
   const orderForm = document.querySelector(".order-form");
   if (orderForm) {
     const dateInput = orderForm.querySelector("[data-delivery-date]");
+    const nativeDateProxy = orderForm.querySelector("[data-native-date-proxy]");
     const calendar = orderForm.querySelector("[data-pickup-calendar]");
     const mode = orderForm.dataset.deliveryMode;
     const allowed = new Set((orderForm.dataset.allowedWeekdays || "").split(",").filter(Boolean).map(Number));
     const hasSpecificPickupDays = mode === "weekdays" && allowed.size > 0;
     const today = new Date((calendar ? calendar.dataset.today : new Date().toISOString().slice(0, 10)) + "T00:00:00");
     let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    let lastPickerOpenAt = 0;
+
+    const openDatePicker = () => {
+      const now = Date.now();
+      if (now - lastPickerOpenAt < 300) return;
+      lastPickerOpenAt = now;
+      if (calendar) {
+        calendar.hidden = false;
+      }
+      dateInput.focus();
+      if (nativeDateProxy && typeof nativeDateProxy.showPicker === "function") {
+        nativeDateProxy.value = dateInput.value;
+        try {
+          nativeDateProxy.showPicker();
+        } catch (error) {
+          nativeDateProxy.focus();
+          nativeDateProxy.click();
+        }
+      } else if (nativeDateProxy) {
+        nativeDateProxy.focus();
+        nativeDateProxy.click();
+      }
+    };
 
     const validateDate = () => {
       if (!dateInput.value) {
@@ -82,12 +106,32 @@
         button.addEventListener("click", () => {
           if (button.disabled) return;
           dateInput.value = button.dataset.date;
+          if (nativeDateProxy) nativeDateProxy.value = button.dataset.date;
           validateDate();
           renderCalendar();
+          calendar.hidden = true;
         });
         grid.appendChild(button);
       }
     };
+
+    dateInput.addEventListener("click", openDatePicker);
+    dateInput.addEventListener("focus", openDatePicker);
+    nativeDateProxy?.addEventListener("change", () => {
+      if (!nativeDateProxy.value) return;
+      const proxyDate = new Date(nativeDateProxy.value + "T00:00:00");
+      if (isAllowedDate(proxyDate)) {
+        dateInput.value = nativeDateProxy.value;
+        visibleMonth = new Date(proxyDate.getFullYear(), proxyDate.getMonth(), 1);
+        validateDate();
+        renderCalendar();
+        if (calendar) calendar.hidden = true;
+      } else {
+        dateInput.value = nativeDateProxy.value;
+        validateDate();
+        if (calendar) calendar.hidden = false;
+      }
+    });
 
     calendar?.querySelector("[data-calendar-prev]")?.addEventListener("click", () => {
       visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);

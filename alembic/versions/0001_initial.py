@@ -65,7 +65,8 @@ def upgrade() -> None:
         CREATE TABLE IF NOT EXISTS delivery_settings (
             id SERIAL PRIMARY KEY,
             mode VARCHAR(30) NOT NULL,
-            allowed_weekdays VARCHAR(30) NOT NULL
+            allowed_weekdays VARCHAR(30) NOT NULL,
+            notification_email VARCHAR(255)
         )
         """
     )

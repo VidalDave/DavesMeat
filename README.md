@@ -73,6 +73,22 @@ Render מספק את `PORT`, והאפליקציה מאזינה על `0.0.0.0`.
 /app/storage
 ```
 
+### התראות אימייל להזמנה חדשה
+
+כדי לשלוח אימייל אחרי יצירת הזמנה, הגדירו ב-Render:
+
+```env
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USERNAME=your-user
+SMTP_PASSWORD=your-password
+SMTP_FROM_EMAIL=orders@example.com
+ORDER_NOTIFICATION_EMAIL=store@example.com
+SMTP_USE_TLS=true
+```
+
+אפשר לעדכן את כתובת יעד ההתראות גם במסך הגדרות האספקה בממשק הניהול. אם השדה ריק, המערכת משתמשת ב-`ORDER_NOTIFICATION_EMAIL`.
+
 ## ניהול
 
 בממשק הניהול אפשר לנהל:

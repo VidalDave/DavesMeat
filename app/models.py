@@ -49,6 +49,7 @@ class DeliverySetting(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     mode: Mapped[str] = mapped_column(String(30), nullable=False, default="any")
     allowed_weekdays: Mapped[str] = mapped_column(String(30), nullable=False, default="0")
+    notification_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
 class Order(Base):

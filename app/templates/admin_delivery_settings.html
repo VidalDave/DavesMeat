@@ -16,8 +16,10 @@
         <label class="check"><input type="checkbox" name="allowed_weekdays" value="{{ value }}" {% if value|string in selected_days %}checked{% endif %}> {{ label }}</label>
       {% endfor %}
     </div>
+    <label>אימייל לקבלת הזמנות
+      <input name="notification_email" type="email" value="{{ setting.notification_email or '' }}" placeholder="{{ notification_email_fallback or 'ORDER_NOTIFICATION_EMAIL' }}">
+    </label>
     <button class="primary" type="submit">שמירה</button>
   </form>
 </main>
 {% endblock %}
-

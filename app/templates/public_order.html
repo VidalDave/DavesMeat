@@ -35,7 +35,8 @@
       </label>
       <label>תאריך אספקה
         <input name="delivery_date" type="text" required readonly placeholder="בחירת תאריך מהלוח" data-delivery-date>
-        <div class="calendar" data-pickup-calendar data-today="{{ today }}">
+        <input class="native-date-proxy" type="date" min="{{ today }}" tabindex="-1" aria-hidden="true" data-native-date-proxy>
+        <div class="calendar" data-pickup-calendar data-today="{{ today }}" hidden>
           <div class="calendar-head">
             <button type="button" data-calendar-prev aria-label="חודש קודם">‹</button>
             <strong data-calendar-title></strong>

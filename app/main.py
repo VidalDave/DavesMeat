@@ -70,7 +70,7 @@ def seed_data() -> None:
             db.add_all([Location(name="תל אביב"), Location(name="רמת גן"), Location(name="גבעתיים"), Location(name="חולון")])
 
         if db.query(DeliverySetting).count() == 0:
-            db.add(DeliverySetting(mode="any", allowed_weekdays="0"))
+            db.add(DeliverySetting(mode="any", allowed_weekdays="", notification_email=os.getenv("ORDER_NOTIFICATION_EMAIL")))
 
         db.commit()
     finally:

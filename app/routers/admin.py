@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+import os
 from pathlib import Path
 import re
 import shutil
@@ -257,7 +258,14 @@ def delivery_settings(request: Request, db: Session = Depends(get_db)):
     context = admin_context(request, db)
     require_role(context["user"], {"admin"})
     setting = db.query(DeliverySetting).first()
-    context.update({"setting": setting, "weekdays": WEEKDAYS, "selected_days": setting.allowed_weekdays.split(",") if setting else []})
+    context.update(
+        {
+            "setting": setting,
+            "weekdays": WEEKDAYS,
+            "selected_days": setting.allowed_weekdays.split(",") if setting else [],
+            "notification_email_fallback": os.getenv("ORDER_NOTIFICATION_EMAIL", ""),
+        }
+    )
     return templates.TemplateResponse("admin_delivery_settings.html", context)
 
 
@@ -271,6 +279,7 @@ async def save_delivery_settings(request: Request, db: Session = Depends(get_db)
     days = [str(day) for day in form.getlist("allowed_weekdays") if str(day).isdigit()]
     setting.mode = "weekdays" if mode == "weekdays" and days else "any"
     setting.allowed_weekdays = ",".join(days)
+    setting.notification_email = str(form.get("notification_email", "")).strip() or None
     db.add(setting)
     db.commit()
     return RedirectResponse(f"{ADMIN_PREFIX}/delivery-settings", status_code=303)
