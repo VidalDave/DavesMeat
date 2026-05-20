@@ -1,3 +1,4 @@
+import logging
 from datetime import date, datetime
 from decimal import Decimal
 
@@ -13,6 +14,7 @@ from app.models import DeliverySetting, Location, Order, OrderItem, Product
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+logger = logging.getLogger(__name__)
 
 
 def is_valid_delivery_date(selected: date, setting: DeliverySetting) -> bool:
@@ -98,5 +100,6 @@ async def create_order(request: Request, db: Session = Depends(get_db)):
     db.add(order)
     db.commit()
     db.refresh(order)
-    send_new_order_email(order, setting.notification_email)
+    if not send_new_order_email(order, setting.notification_email):
+        logger.warning("Order saved but notification email was not sent: order_id=%s", order.id)
     return RedirectResponse("/?success=true", status_code=303)

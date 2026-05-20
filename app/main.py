@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -9,6 +10,9 @@ from app.auth import hash_password, session_cookie_secure
 from app.database import SessionLocal
 from app.models import DeliverySetting, Location, Product, User
 from app.routers import admin, public
+
+
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO").upper())
 
 
 def create_app() -> FastAPI:

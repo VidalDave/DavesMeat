@@ -85,9 +85,12 @@ SMTP_PASSWORD=your-password
 SMTP_FROM_EMAIL=orders@example.com
 ORDER_NOTIFICATION_EMAIL=store@example.com
 SMTP_USE_TLS=true
+SMTP_USE_SSL=false
+LOG_LEVEL=INFO
 ```
 
 אפשר לעדכן את כתובת יעד ההתראות גם במסך הגדרות האספקה בממשק הניהול. אם השדה ריק, המערכת משתמשת ב-`ORDER_NOTIFICATION_EMAIL`.
+אם ספק ה-SMTP משתמש בפורט `465`, הגדירו `SMTP_USE_SSL=true` ו-`SMTP_USE_TLS=false`.
 
 ## ניהול
 

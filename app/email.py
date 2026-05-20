@@ -32,19 +32,23 @@ def notification_recipient(setting_email: str | None = None) -> str:
 def send_new_order_email(order: Order, setting_email: str | None = None) -> bool:
     recipient = notification_recipient(setting_email)
     if not recipient:
-        logger.info("Order notification email skipped: ORDER_NOTIFICATION_EMAIL is not configured")
+        logger.warning("Order notification email skipped for order_id=%s: ORDER_NOTIFICATION_EMAIL is not configured", order.id)
         return False
 
     host = os.getenv("SMTP_HOST", "").strip()
     from_email = os.getenv("SMTP_FROM_EMAIL", "").strip()
     if not host or not from_email:
-        logger.warning("Order notification email skipped: SMTP_HOST or SMTP_FROM_EMAIL is missing")
+        logger.warning(
+            "Order notification email skipped for order_id=%s: SMTP_HOST or SMTP_FROM_EMAIL is missing",
+            order.id,
+        )
         return False
 
     port = _env_int("SMTP_PORT", 587)
     username = os.getenv("SMTP_USERNAME", "").strip()
     password = os.getenv("SMTP_PASSWORD", "")
     use_tls = _env_bool("SMTP_USE_TLS", True)
+    use_ssl = _env_bool("SMTP_USE_SSL", port == 465)
 
     message = EmailMessage()
     message["Subject"] = "New order received"
@@ -53,8 +57,20 @@ def send_new_order_email(order: Order, setting_email: str | None = None) -> bool
     message.set_content(_order_email_body(order))
 
     try:
-        with smtplib.SMTP(host, port, timeout=15) as smtp:
-            if use_tls:
+        logger.info(
+            "Sending order notification email: order_id=%s host=%s port=%s tls=%s ssl=%s from=%s to=%s username_configured=%s",
+            order.id,
+            host,
+            port,
+            use_tls,
+            use_ssl,
+            from_email,
+            recipient,
+            bool(username),
+        )
+        smtp_class = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
+        with smtp_class(host, port, timeout=15) as smtp:
+            if use_tls and not use_ssl:
                 smtp.starttls()
             if username:
                 smtp.login(username, password)

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Product image placeholder">
+  <rect width="800" height="600" fill="#eef4f1"/>
+  <circle cx="280" cy="260" r="90" fill="#0f7b63" opacity=".18"/>
+  <circle cx="400" cy="240" r="115" fill="#0f7b63" opacity=".22"/>
+  <circle cx="520" cy="275" r="85" fill="#0f7b63" opacity=".16"/>
+  <path d="M180 390c95-70 180-70 255 0 70-55 132-56 185-4v64H180z" fill="#0f7b63" opacity=".35"/>
+  <text x="400" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" fill="#075945">תמונת מוצר</text>
+</svg>

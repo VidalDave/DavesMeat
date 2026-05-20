@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -32,7 +33,11 @@ class Product(Base):
 
     @property
     def display_image(self) -> str:
-        return self.image_path or self.image_url
+        if self.image_path:
+            local_path = Path(self.image_path.lstrip("/"))
+            if local_path.exists():
+                return self.image_path
+        return self.image_url or "/static/img/product-placeholder.svg"
 
 
 class Location(Base):
