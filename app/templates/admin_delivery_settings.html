@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}הגדרות אספקה{% endblock %}
+{% block body %}
+{% include "_admin_nav.html" %}
+<main class="admin-shell">
+  <h1>הגדרות תאריך אספקה</h1>
+  <form class="panel-form" method="post">
+    <label>מצב
+      <select name="mode">
+        <option value="any" {% if setting.mode == "any" %}selected{% endif %}>כל תאריך</option>
+        <option value="weekdays" {% if setting.mode == "weekdays" %}selected{% endif %}>ימים נבחרים בלבד</option>
+      </select>
+    </label>
+    <div class="weekday-grid">
+      {% for value, label in weekdays %}
+        <label class="check"><input type="checkbox" name="allowed_weekdays" value="{{ value }}" {% if value|string in selected_days %}checked{% endif %}> {{ label }}</label>
+      {% endfor %}
+    </div>
+    <button class="primary" type="submit">שמירה</button>
+  </form>
+</main>
+{% endblock %}
+

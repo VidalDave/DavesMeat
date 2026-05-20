@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}משתמשים{% endblock %}
+{% block body %}
+{% include "_admin_nav.html" %}
+<main class="admin-shell">
+  <h1>משתמשים</h1>
+  <form class="panel-form compact" method="post">
+    <input type="hidden" name="user_id" data-edit-id>
+    <label>שם משתמש<input name="username" required></label>
+    <label>סיסמה<input name="password" type="password" placeholder="להשאיר ריק ללא שינוי"></label>
+    <label>תפקיד
+      <select name="role">{% for key, label in roles.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select>
+    </label>
+    <label class="check"><input name="is_active" type="checkbox" checked> פעיל</label>
+    <button class="primary" type="submit">שמירה</button>
+  </form>
+  <div class="management-list simple">
+    {% for account in users %}
+      <article data-row='{{ {"id": account.id|string, "username": account.username, "role": account.role, "is_active": account.is_active}|tojson }}'>
+        <div><h3>{{ account.username }}</h3><p>{{ roles[account.role] }} · {{ "פעיל" if account.is_active else "לא פעיל" }}</p></div>
+        <button type="button" data-edit-row>עריכה</button>
+      </article>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

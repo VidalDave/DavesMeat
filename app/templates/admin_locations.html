@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}מיקומים{% endblock %}
+{% block body %}
+{% include "_admin_nav.html" %}
+<main class="admin-shell">
+  <h1>מיקומים</h1>
+  <form class="panel-form compact" method="post">
+    <input type="hidden" name="location_id" data-edit-id>
+    <label>מיקום<input name="name" required></label>
+    <label class="check"><input name="is_active" type="checkbox" checked> פעיל</label>
+    <button class="primary" type="submit">שמירה</button>
+  </form>
+  <div class="management-list simple">
+    {% for location in locations %}
+      <article data-row='{{ {"id": location.id|string, "name": location.name, "is_active": location.is_active}|tojson }}'>
+        <div><h3>{{ location.name }}</h3><p>{{ "פעיל" if location.is_active else "לא פעיל" }}</p></div>
+        <button type="button" data-edit-row>עריכה</button>
+      </article>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

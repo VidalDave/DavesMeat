@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}ניהול הזמנות{% endblock %}
+{% block body %}
+{% include "_admin_nav.html" %}
+<main class="admin-shell">
+  <h1>ניהול הזמנות</h1>
+  <div class="metric-grid">
+    <div><span>{{ orders_count }}</span><p>הזמנות</p></div>
+    <div><span>{{ new_orders }}</span><p>חדשות</p></div>
+    <div><span>{{ products_count }}</span><p>מוצרים</p></div>
+    <div><span>{{ locations_count }}</span><p>מיקומים</p></div>
+  </div>
+</main>
+{% endblock %}
+

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}כניסת מנהלים{% endblock %}
+{% block body %}
+<main class="login-shell">
+  <form class="login-card" method="post" action="/admin/login">
+    <h1>כניסת מנהלים</h1>
+    {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+    <label>שם משתמש
+      <input name="username" required autocomplete="username">
+    </label>
+    <label>סיסמה
+      <input name="password" type="password" required autocomplete="current-password">
+    </label>
+    <button class="primary" type="submit">כניסה</button>
+  </form>
+</main>
+{% endblock %}
+

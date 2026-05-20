@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}הזמנה {{ order.id }}{% endblock %}
+{% block body %}
+{% include "_admin_nav.html" %}
+<main class="admin-shell">
+  <h1>הזמנה #{{ order.id }}</h1>
+  <section class="detail-grid">
+    <div><strong>שם מלא</strong><span>{{ order.full_name }}</span></div>
+    <div><strong>טלפון</strong><span>{{ order.phone }}</span></div>
+    <div><strong>מיקום</strong><span>{{ order.location.name }}</span></div>
+    <div><strong>תאריך אספקה</strong><span>{{ order.delivery_date }}</span></div>
+  </section>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>מוצר</th><th>משקל</th><th>כמות</th><th>מחיר</th><th>סהכ</th></tr></thead>
+      <tbody>
+      {% for item in order.items %}
+        <tr><td>{{ item.product_name }}</td><td>{{ item.product_weight }}</td><td>{{ item.quantity }}</td><td>₪{{ "%.2f"|format(item.unit_price) }}</td><td>₪{{ "%.2f"|format(item.unit_price * item.quantity) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form class="panel-form" method="post">
+    <label>סטטוס
+      <select name="status">{% for key, label in statuses.items() %}<option value="{{ key }}" {% if order.status == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    </label>
+    <label>הערת מנהל
+      <textarea name="admin_note" rows="4">{{ order.admin_note }}</textarea>
+    </label>
+    <button class="primary" type="submit">שמירה</button>
+  </form>
+</main>
+{% endblock %}
+

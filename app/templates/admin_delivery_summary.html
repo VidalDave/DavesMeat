@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}סיכום מוצרים לתאריך אספקה{% endblock %}
+{% block body %}
+{% include "_admin_nav.html" %}
+<main class="admin-shell">
+  <h1>סיכום מוצרים לתאריך אספקה</h1>
+  <form class="filters" method="get">
+    <input type="date" name="delivery_date" value="{{ delivery_date }}" required>
+    <button type="submit">הצגה</button>
+  </form>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>מוצר</th><th>כמות כוללת</th><th>משקל</th><th>מחיר כולל</th><th>מספר הזמנות</th></tr></thead>
+      <tbody>
+      {% for row in rows %}
+        <tr><td>{{ row.product_name }}</td><td>{{ row.total_quantity }}</td><td>{{ row.product_weight }}</td><td>₪{{ "%.2f"|format(row.total_price) }}</td><td>{{ row.orders_count }}</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th>סהכ</th><th>{{ total_items }}</th><th></th><th>₪{{ "%.2f"|format(total_amount) }}</th><th></th></tr></tfoot>
+    </table>
+  </div>
+</main>
+{% endblock %}
+

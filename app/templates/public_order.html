@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}שליחת הזמנה{% endblock %}
+{% block body %}
+<main class="public-shell">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">חנות הזמנות</p>
+      <h1>הזמנת מוצרים טריים</h1>
+      <p>בחרו מוצרים, כמות ותאריך אספקה. אין צורך בהרשמה.</p>
+    </div>
+    <a class="admin-link" href="/admin">ניהול הזמנות</a>
+  </section>
+
+  {% if success %}
+    <div class="alert success">ההזמנה נשלחה בהצלחה. נחזור אליכם לאישור.</div>
+  {% endif %}
+  {% if error %}
+    <div class="alert error">נא לבדוק שכל השדות תקינים ושנבחר לפחות מוצר אחד.</div>
+  {% endif %}
+
+  <form class="order-form" method="post" action="/orders" data-delivery-mode="{{ setting.mode }}" data-allowed-weekdays="{{ setting.allowed_weekdays }}">
+    <div class="form-grid">
+      <label>שם מלא
+        <input name="full_name" required maxlength="160" autocomplete="name">
+      </label>
+      <label>טלפון
+        <input name="phone" required maxlength="40" inputmode="tel" autocomplete="tel">
+      </label>
+      <label>מיקום
+        <select name="location_id" required>
+          <option value="">בחירת מיקום</option>
+          {% for location in locations %}
+            <option value="{{ location.id }}">{{ location.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>תאריך אספקה
+        <input name="delivery_date" type="date" required min="{{ today }}" data-delivery-date>
+      </label>
+    </div>
+
+    <h2>מוצרים</h2>
+    <div class="products-grid">
+      {% for product in products %}
+        <article class="product-card">
+          <button class="image-button" type="button" data-preview="{{ product.image_url }}">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}">
+          </button>
+          <div class="product-body">
+            <h3>{{ product.name }}</h3>
+            <p class="muted">{{ product.weight }}</p>
+            <p>{{ product.features }}</p>
+            <div class="product-footer">
+              <strong>₪{{ "%.2f"|format(product.price) }}</strong>
+              <label>כמות
+                <input type="number" name="quantity_{{ product.id }}" min="0" step="1" value="0">
+              </label>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    <button class="primary" type="submit">שליחת הזמנה</button>
+  </form>
+</main>
+<div class="preview" hidden data-image-preview>
+  <img alt="תצוגה מקדימה">
+</div>
+{% endblock %}
+
