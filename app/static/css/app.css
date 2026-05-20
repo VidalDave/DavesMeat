@@ -10,6 +10,8 @@
   --danger: #9f2d35;
   --success: #18724f;
   --shadow: 0 12px 34px rgba(28, 44, 36, .10);
+  --admin-sidebar-width: 240px;
+  --admin-sidebar-gap: 24px;
   font-family: Arial, "Noto Sans Hebrew", sans-serif;
 }
 
@@ -38,9 +40,9 @@ button, .primary {
 }
 .public-shell { width: min(1120px, 100%); margin: 0 auto; padding: 20px; }
 .admin-shell {
-  width: calc(100% - 240px);
+  width: auto;
   margin-inline-start: 0;
-  margin-inline-end: 240px;
+  margin-inline-end: calc(var(--admin-sidebar-width) + var(--admin-sidebar-gap));
   padding: 24px;
 }
 .hero {
@@ -168,7 +170,7 @@ button, .primary {
   flex-direction: column;
   gap: 10px;
   align-items: stretch;
-  width: 240px;
+  width: var(--admin-sidebar-width);
   overflow-y: auto;
   padding: 18px;
   background: #fff;
@@ -225,7 +227,7 @@ tfoot th { background: #f1f5f2; }
 @media (max-width: 720px) {
   .public-shell, .admin-shell { padding: 14px; }
   .admin-shell {
-    width: 100%;
+    width: auto;
     margin-inline-end: 0;
   }
   .hero { min-height: 220px; display: grid; align-items: end; }
