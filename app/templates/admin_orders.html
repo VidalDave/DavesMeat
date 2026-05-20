@@ -28,7 +28,7 @@
       {% for order in orders %}
         <tr>
           <td>{{ order.id }}</td><td>{{ order.full_name }}</td><td>{{ order.phone }}</td><td>{{ order.location.name }}</td>
-          <td>{{ order.delivery_date }}</td><td>{{ statuses[order.status] }}</td><td><a href="/admin/orders/{{ order.id }}">פתיחה</a></td>
+          <td>{{ order.delivery_date }}</td><td>{{ statuses[order.status] }}</td><td><a href="/ddavedata/orders/{{ order.id }}">פתיחה</a></td>
         </tr>
       {% endfor %}
       </tbody>
@@ -36,4 +36,3 @@
   </div>
 </main>
 {% endblock %}
-

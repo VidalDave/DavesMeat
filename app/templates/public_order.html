@@ -8,7 +8,6 @@
       <h1>הזמנת מוצרים טריים</h1>
       <p>בחרו מוצרים, כמות ותאריך אספקה. אין צורך בהרשמה.</p>
     </div>
-    <a class="admin-link" href="/admin">ניהול הזמנות</a>
   </section>
 
   {% if success %}
@@ -35,7 +34,18 @@
         </select>
       </label>
       <label>תאריך אספקה
-        <input name="delivery_date" type="date" required min="{{ today }}" data-delivery-date>
+        <input name="delivery_date" type="text" required readonly placeholder="בחירת תאריך מהלוח" data-delivery-date>
+        <div class="calendar" data-pickup-calendar data-today="{{ today }}">
+          <div class="calendar-head">
+            <button type="button" data-calendar-prev aria-label="חודש קודם">‹</button>
+            <strong data-calendar-title></strong>
+            <button type="button" data-calendar-next aria-label="חודש הבא">›</button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>א</span><span>ב</span><span>ג</span><span>ד</span><span>ה</span><span>ו</span><span>ש</span>
+          </div>
+          <div class="calendar-grid" data-calendar-grid></div>
+        </div>
       </label>
     </div>
 
@@ -43,8 +53,8 @@
     <div class="products-grid">
       {% for product in products %}
         <article class="product-card">
-          <button class="image-button" type="button" data-preview="{{ product.image_url }}">
-            <img src="{{ product.image_url }}" alt="{{ product.name }}">
+          <button class="image-button" type="button" data-preview="{{ product.display_image }}">
+            <img src="{{ product.display_image }}" alt="{{ product.name }}">
           </button>
           <div class="product-body">
             <h3>{{ product.name }}</h3>
@@ -68,4 +78,3 @@
   <img alt="תצוגה מקדימה">
 </div>
 {% endblock %}
-

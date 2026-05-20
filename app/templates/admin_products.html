@@ -4,20 +4,24 @@
 {% include "_admin_nav.html" %}
 <main class="admin-shell">
   <h1>מוצרים</h1>
-  <form class="panel-form" method="post">
+  <form class="panel-form" method="post" enctype="multipart/form-data">
     <input type="hidden" name="product_id" data-edit-id>
     <label>שם מוצר<input name="name" required></label>
-    <label>Image URL<input name="image_url" required></label>
+    <label>Image URL<input name="image_url" placeholder="אפשר להשאיר ריק אם מעלים קובץ"></label>
+    <label>העלאת תמונה<input name="image_file" type="file" accept=".jpg,.jpeg,.png,.webp" data-product-file></label>
     <label>משקל<input name="weight" required></label>
     <label>מחיר<input name="price" type="number" min="0.01" step="0.01" required></label>
     <label>מאפיינים<textarea name="features"></textarea></label>
+    <div class="upload-preview" data-upload-preview hidden>
+      <img alt="תצוגה מקדימה לתמונה">
+    </div>
     <label class="check"><input name="is_active" type="checkbox" checked> פעיל</label>
     <button class="primary" type="submit">שמירה</button>
   </form>
   <div class="management-list">
     {% for product in products %}
-      <article data-row='{{ {"id": product.id|string, "name": product.name, "image_url": product.image_url, "weight": product.weight, "price": product.price|string, "features": product.features, "is_active": product.is_active}|tojson }}'>
-        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+      <article data-row='{{ {"id": product.id|string, "name": product.name, "image_url": product.image_url, "image_path": product.image_path, "weight": product.weight, "price": product.price|string, "features": product.features, "is_active": product.is_active}|tojson }}'>
+        <img src="{{ product.display_image }}" alt="{{ product.name }}">
         <div><h3>{{ product.name }}</h3><p>₪{{ "%.2f"|format(product.price) }} · {{ product.weight }} · {{ "פעיל" if product.is_active else "לא פעיל" }}</p></div>
         <button type="button" data-edit-row>עריכה</button>
       </article>

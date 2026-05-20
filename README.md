@@ -36,7 +36,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload
 ```
 
 האתר הציבורי: `http://localhost:10000`  
-ממשק ניהול: `http://localhost:10000/admin`
+ממשק ניהול: `http://localhost:10000/ddavedata`
 
 ## התחברות ראשונית
 
@@ -62,6 +62,16 @@ alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000
 ```
 
 Render מספק את `PORT`, והאפליקציה מאזינה על `0.0.0.0`.
+
+### אחסון תמונות מוצר
+
+תמונות שמועלות דרך ניהול מוצרים נשמרות תחת `storage/static/uploads/products`.
+ב-Render מערכת הקבצים של השירות אינה קבועה בין deploy/restart אלא אם מחברים Persistent Disk.
+כדי לשמור תמונות שהועלו לאורך זמן, צרו Persistent Disk והגדירו אותו לנתיב:
+
+```txt
+/app/storage
+```
 
 ## ניהול
 

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -20,6 +21,8 @@ def create_app() -> FastAPI:
         max_age=60 * 60 * 8,
     )
     app.mount("/static", StaticFiles(directory="app/static"), name="static")
+    Path("storage/static/uploads/products").mkdir(parents=True, exist_ok=True)
+    app.mount("/storage/static", StaticFiles(directory="storage/static"), name="storage_static")
     app.include_router(public.router)
     app.include_router(admin.router)
 

@@ -1,7 +1,11 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
+import re
+import shutil
+from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
@@ -12,7 +16,11 @@ from app.database import get_db
 from app.models import DeliverySetting, Location, Order, OrderItem, Product, User
 
 
-router = APIRouter(prefix="/admin")
+ADMIN_PREFIX = "/ddavedata"
+UPLOAD_DIR = Path("storage/static/uploads/products")
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+
+router = APIRouter(prefix=ADMIN_PREFIX)
 templates = Jinja2Templates(directory="app/templates")
 
 ORDER_STATUSES = {
@@ -28,7 +36,25 @@ WEEKDAYS = [(0, "ראשון"), (1, "שני"), (2, "שלישי"), (3, "רביעי
 
 def admin_context(request: Request, db: Session) -> dict:
     user = require_admin_user(request, db)
-    return {"request": request, "user": user, "statuses": ORDER_STATUSES, "roles": ROLES}
+    return {"request": request, "user": user, "statuses": ORDER_STATUSES, "roles": ROLES, "admin_prefix": ADMIN_PREFIX}
+
+
+def save_uploaded_product_image(upload: UploadFile | None) -> str | None:
+    if not upload or not upload.filename:
+        return None
+
+    original_name = Path(upload.filename).name
+    extension = original_name.rsplit(".", 1)[-1].lower() if "." in original_name else ""
+    if extension not in ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="סוג קובץ תמונה לא נתמך")
+
+    safe_stem = re.sub(r"[^A-Za-z0-9_-]+", "-", Path(original_name).stem).strip("-") or "product"
+    filename = f"{safe_stem}-{uuid4().hex}.{extension}"
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    destination = UPLOAD_DIR / filename
+    with destination.open("wb") as buffer:
+        shutil.copyfileobj(upload.file, buffer)
+    return f"/storage/static/uploads/products/{filename}"
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -43,13 +69,13 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
         return templates.TemplateResponse("admin_login.html", {"request": request, "error": "שם משתמש או סיסמה שגויים"}, status_code=401)
     request.session.clear()
     request.session["user_id"] = user.id
-    return RedirectResponse("/admin", status_code=303)
+    return RedirectResponse(ADMIN_PREFIX, status_code=303)
 
 
 @router.post("/logout")
 def logout(request: Request):
     request.session.clear()
-    return RedirectResponse("/admin/login", status_code=303)
+    return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=303)
 
 
 @router.get("", response_class=HTMLResponse)
@@ -120,7 +146,7 @@ def update_order(order_id: int, request: Request, status: str = Form(...), admin
     order.status = status
     order.admin_note = admin_note.strip()
     db.commit()
-    return RedirectResponse(f"/admin/orders/{order.id}", status_code=303)
+    return RedirectResponse(f"{ADMIN_PREFIX}/orders/{order.id}", status_code=303)
 
 
 @router.get("/products", response_class=HTMLResponse)
@@ -136,7 +162,8 @@ def save_product(
     request: Request,
     product_id: str = Form(""),
     name: str = Form(...),
-    image_url: str = Form(...),
+    image_url: str = Form(""),
+    image_file: UploadFile | None = File(None),
     weight: str = Form(...),
     price: str = Form(...),
     features: str = Form(""),
@@ -152,15 +179,22 @@ def save_product(
     if parsed_price <= 0:
         raise HTTPException(status_code=400, detail="מחיר חייב להיות גדול מאפס")
     product = db.query(Product).filter(Product.id == int(product_id)).first() if product_id else Product()
+    if not product:
+        raise HTTPException(status_code=404)
+    image_path = save_uploaded_product_image(image_file)
+    if not image_url.strip() and not image_path and not getattr(product, "image_path", None):
+        raise HTTPException(status_code=400, detail="נדרשת תמונת מוצר או כתובת תמונה")
     product.name = name.strip()
     product.image_url = image_url.strip()
+    if image_path:
+        product.image_path = image_path
     product.weight = weight.strip()
     product.price = parsed_price
     product.features = features.strip()
     product.is_active = is_active == "on"
     db.add(product)
     db.commit()
-    return RedirectResponse("/admin/products", status_code=303)
+    return RedirectResponse(f"{ADMIN_PREFIX}/products", status_code=303)
 
 
 @router.get("/locations", response_class=HTMLResponse)
@@ -180,7 +214,7 @@ def save_location(request: Request, location_id: str = Form(""), name: str = For
     location.is_active = is_active == "on"
     db.add(location)
     db.commit()
-    return RedirectResponse("/admin/locations", status_code=303)
+    return RedirectResponse(f"{ADMIN_PREFIX}/locations", status_code=303)
 
 
 @router.get("/users", response_class=HTMLResponse)
@@ -215,7 +249,7 @@ def save_user(
         raise HTTPException(status_code=400, detail="נדרשת סיסמה")
     db.add(user)
     db.commit()
-    return RedirectResponse("/admin/users", status_code=303)
+    return RedirectResponse(f"{ADMIN_PREFIX}/users", status_code=303)
 
 
 @router.get("/delivery-settings", response_class=HTMLResponse)
@@ -235,11 +269,11 @@ async def save_delivery_settings(request: Request, db: Session = Depends(get_db)
     setting = db.query(DeliverySetting).first() or DeliverySetting()
     mode = str(form.get("mode", "any"))
     days = [str(day) for day in form.getlist("allowed_weekdays") if str(day).isdigit()]
-    setting.mode = mode if mode in {"any", "weekdays"} else "any"
-    setting.allowed_weekdays = ",".join(days) if days else "0"
+    setting.mode = "weekdays" if mode == "weekdays" and days else "any"
+    setting.allowed_weekdays = ",".join(days)
     db.add(setting)
     db.commit()
-    return RedirectResponse("/admin/delivery-settings", status_code=303)
+    return RedirectResponse(f"{ADMIN_PREFIX}/delivery-settings", status_code=303)
 
 
 @router.get("/delivery-summary", response_class=HTMLResponse)
@@ -271,4 +305,3 @@ def delivery_summary(request: Request, delivery_date: str = "", db: Session = De
         }
     )
     return templates.TemplateResponse("admin_delivery_summary.html", context)
-

@@ -15,10 +15,14 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 def is_valid_delivery_date(selected: date, setting: DeliverySetting) -> bool:
+    if selected < date.today():
+        return False
     if setting.mode == "any":
         return True
     js_weekday = (selected.weekday() + 1) % 7
     allowed = {int(day) for day in setting.allowed_weekdays.split(",") if day != ""}
+    if not allowed:
+        return True
     return js_weekday in allowed
 
 
@@ -93,4 +97,3 @@ async def create_order(request: Request, db: Session = Depends(get_db)):
     db.add(order)
     db.commit()
     return RedirectResponse("/?success=true", status_code=303)
-

@@ -1,13 +1,12 @@
 <nav class="admin-nav">
-  <a href="/admin">ניהול הזמנות</a>
-  <a href="/admin/orders">הזמנות</a>
-  <a href="/admin/delivery-summary">סיכום מוצרים לתאריך אספקה</a>
+  <a class="admin-brand" href="/ddavedata">לוח בקרה</a>
+  <a href="/ddavedata/orders">הזמנות</a>
+  <a href="/ddavedata/delivery-summary">סיכום מוצרים לתאריך אספקה</a>
   {% if user.role == "admin" %}
-    <a href="/admin/products">מוצרים</a>
-    <a href="/admin/locations">מיקומים</a>
-    <a href="/admin/users">משתמשים</a>
-    <a href="/admin/delivery-settings">הגדרות אספקה</a>
+    <a href="/ddavedata/products">מוצרים</a>
+    <a href="/ddavedata/locations">מיקומים</a>
+    <a href="/ddavedata/users">משתמשים</a>
+    <a href="/ddavedata/delivery-settings">הגדרות אספקה</a>
   {% endif %}
-  <form method="post" action="/admin/logout"><button type="submit">יציאה</button></form>
+  <form method="post" action="/ddavedata/logout"><button type="submit">יציאה</button></form>
 </nav>
-

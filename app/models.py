@@ -23,11 +23,16 @@ class Product(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(160), nullable=False)
     image_url: Mapped[str] = mapped_column(Text, nullable=False)
+    image_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     weight: Mapped[str] = mapped_column(String(80), nullable=False)
     price: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
     features: Mapped[str] = mapped_column(Text, nullable=False, default="")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+
+    @property
+    def display_image(self) -> str:
+        return self.image_path or self.image_url
 
 
 class Location(Base):
@@ -77,4 +82,3 @@ class OrderItem(Base):
 
     order: Mapped[Order] = relationship("Order", back_populates="items")
     product: Mapped[Product] = relationship("Product")
-

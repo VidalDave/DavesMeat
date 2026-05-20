@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}ניהול הזמנות{% endblock %}
+{% block title %}לוח בקרה{% endblock %}
 {% block body %}
 {% include "_admin_nav.html" %}
 <main class="admin-shell">
-  <h1>ניהול הזמנות</h1>
+  <h1>לוח בקרה</h1>
   <div class="metric-grid">
     <div><span>{{ orders_count }}</span><p>הזמנות</p></div>
     <div><span>{{ new_orders }}</span><p>חדשות</p></div>
@@ -12,4 +12,3 @@
   </div>
 </main>
 {% endblock %}
-

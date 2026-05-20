@@ -37,6 +37,7 @@ def upgrade() -> None:
             id SERIAL PRIMARY KEY,
             name VARCHAR(160) NOT NULL,
             image_url TEXT NOT NULL,
+            image_path TEXT,
             weight VARCHAR(80) NOT NULL,
             price NUMERIC(10, 2) NOT NULL,
             features TEXT NOT NULL,

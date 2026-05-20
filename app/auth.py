@@ -53,7 +53,7 @@ def current_user(request: Request, db: Session) -> User | None:
 def require_admin_user(request: Request, db: Session) -> User:
     user = current_user(request, db)
     if not user:
-        raise HTTPException(status_code=status.HTTP_303_SEE_OTHER, headers={"Location": "/admin/login"})
+        raise HTTPException(status_code=status.HTTP_303_SEE_OTHER, headers={"Location": "/ddavedata/login"})
     return user
 
 
